@@ -4,7 +4,7 @@
 
 1. Clone this repository:
     ```sh
-    git clone <repository-url>
+    git clone  https://github.com/diarmuidoconnor/ds-eda-exam.git 
     ```
 
 2. Navigate to the project directory:
@@ -17,4 +17,9 @@
     npm install
     ```
 
-4. Study this project's code and thoroughly review the code in your submission for assignment 2.
+4. Run the schema setup script:
+    ```sh
+    npm run schema
+    ```
+
+5. Study this project's code and thoroughly review the code in your submission for assignment 2.
