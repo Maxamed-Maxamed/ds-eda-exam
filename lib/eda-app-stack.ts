@@ -15,53 +15,57 @@ import { Construct } from "constructs";
 
 export class EDAAppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+	super(scope, id, props);
 
-    const bucket = new s3.Bucket(this, "ABucket", {
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-      publicReadAccess: false,
-    });
+	const bucket = new s3.Bucket(this, "ABucket", {
+  	removalPolicy: cdk.RemovalPolicy.DESTROY,
+  	autoDeleteObjects: true,
+  	publicReadAccess: false,
+	});
 
-    const table = new dynamodb.Table(this, "TableA", {
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      partitionKey: { name: "name", type: dynamodb.AttributeType.STRING },
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      tableName: "ZppData",
-    });
+	const table = new dynamodb.Table(this, "TableA", {
+  	billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+  	partitionKey: { name: "name", type: dynamodb.AttributeType.STRING },
+  	removalPolicy: cdk.RemovalPolicy.DESTROY,
+  	tableName: "ZppData",
+	});
 
-    const queueB = new sqs.Queue(this, "QueueB", {
-      receiveMessageWaitTime: cdk.Duration.seconds(10),
-    });
+	const queueB = new sqs.Queue(this, "QueueB", {
+  	receiveMessageWaitTime: cdk.Duration.seconds(10),
+	});
 
-    const queueA = new sqs.Queue(this, "QueueA", {
-      receiveMessageWaitTime: cdk.Duration.seconds(5),
-    });
+	const queueA = new sqs.Queue(this, "QueueA", {
+  	receiveMessageWaitTime: cdk.Duration.seconds(5),
+	});
 
-    const topic1 = new sns.Topic(this, "TopicA", {
-      displayName: "New Image topic",
-    });
+	const topic1 = new sns.Topic(this, "TopicA", {
+  	displayName: "New Image topic",
+	});
 
-    const topic2 = new sns.Topic(this, "TopicB", {
-      displayName: "New Image topic",
-    });
+	const topic2 = new sns.Topic(this, "TopicB", {
+  	displayName: "New Image topic",
+	});
 
-    const lambdaAFn = new lambdanode.NodejsFunction(this, "lambdaAFn", {
-      runtime: lambda.Runtime.NODEJS_18_X,
-      entry: `${__dirname}/../lambdas/lambdaA.ts`,
-      timeout: cdk.Duration.seconds(15),
-      memorySize: 128,
-    });
+	const lambdaAFn = new lambdanode.NodejsFunction(this, "lambdaAFn", {
+  	runtime: lambda.Runtime.NODEJS_18_X,
+  	entry: `${__dirname}/../lambdas/lambdaA.ts`,
+  	timeout: cdk.Duration.seconds(15),
+  	memorySize: 128,
+	});
 
-    const lambdaBFn = new lambdanode.NodejsFunction(this, "lambdaBFn", {
-      runtime: lambda.Runtime.NODEJS_18_X,
-      entry: `${__dirname}/../lambdas/lambdaB.ts`,
-      timeout: cdk.Duration.seconds(15),
-      memorySize: 128,
-    });
+	lambdaAFn.addEventSource(new events.SnsEventSource(topic1));
 
-    new cdk.CfnOutput(this, "Topic 1", {
-      value: topic1.topicArn,
-    });
+	const lambdaBFn = new lambdanode.NodejsFunction(this, "lambdaBFn", {
+  	runtime: lambda.Runtime.NODEJS_18_X,
+  	entry: `${__dirname}/../lambdas/lambdaB.ts`,
+  	timeout: cdk.Duration.seconds(15),
+  	memorySize: 128,
+	});
+
+	lambdaBFn.addEventSource(new events.SqsEventSource(queueB));
+
+	new cdk.CfnOutput(this, "Topic 1", {
+  	value: topic1.topicArn,
+	});
   }
 }
