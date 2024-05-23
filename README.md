@@ -23,3 +23,11 @@
     ```
 
 5. Study this project's code and thoroughly review the code in your submission for assignment 2.
+
+
+6. picture of result 
+
+![Result Screenshot](./pic1.png)
+![Result Screenshot](./pic2.png)
+
+
