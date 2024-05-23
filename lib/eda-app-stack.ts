@@ -12,12 +12,16 @@ export class EDAAppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const queueA = new sqs.Queue(this, "QueueA", {
-      receiveMessageWaitTime: cdk.Duration.seconds(5),
-    });
-
     const queueB = new sqs.Queue(this, "QueueB", {
       receiveMessageWaitTime: cdk.Duration.seconds(10),
+    });
+
+    const queueA = new sqs.Queue(this, "QueueA", {
+      receiveMessageWaitTime: cdk.Duration.seconds(5),
+      deadLetterQueue: {
+        queue: queueB,
+        maxReceiveCount: 1
+      }
     });
 
     const topic1 = new sns.Topic(this, "TopicA", {
@@ -26,6 +30,19 @@ export class EDAAppStack extends cdk.Stack {
 
     const topic2 = new sns.Topic(this, "TopicB", {
       displayName: "New Image topic",
+    });
+
+     // Output the ARNs of the SNS topics
+     new cdk.CfnOutput(this, 'TopicAOutput', {
+      value: topic1.topicArn,
+      description: 'ARN of Topic A',
+      exportName: 'TopicAARN'
+    });
+
+    new cdk.CfnOutput(this, 'TopicBOutput', {
+      value: topic2.topicArn,
+      description: 'ARN of Topic B',
+      exportName: 'TopicBARN'
     });
 
     // Add subscription with filter policy to Topic1
@@ -55,4 +72,6 @@ export class EDAAppStack extends cdk.Stack {
 
     lambdaBFn.addEventSource(new events.SqsEventSource(queueB));
   }
+
 }
+
