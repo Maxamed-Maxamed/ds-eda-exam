@@ -28,6 +28,6 @@
 6. picture of result 
 
 ![Result Screenshot](./pic1.png)
-![Result Screenshot](./pic2.png)
 
+![Result Screenshot 2](./pc2.png)
 
